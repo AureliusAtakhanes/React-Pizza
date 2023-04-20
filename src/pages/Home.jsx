@@ -4,13 +4,15 @@ import PizzaBlock from '../components/PizzaBlock';
 import Sort from '../components/Sort';
 import { Skeleton } from '../components/Skeleton';
 import Categories from '../components/Categories';
+import { Pagination } from '../components/Pagination';
 
 const Home = () => {
     const [items, setItems] = useState([])
     const [isLoading, setIsLoading] = useState(true)
+    const [currentPage, setCurrentPage] = useState(1)
 
     useEffect(() => {
-        fetch('https://6440e954792fe886a898ea59.mockapi.io/items')
+        fetch(`https://6440e954792fe886a898ea59.mockapi.io/items?page=${currentPage}&limit=4`)
             .then((res) => res.json())
             .then((arr) => {
                 setTimeout(() => {
@@ -18,7 +20,9 @@ const Home = () => {
                     setIsLoading(false)
                 }, 1000)
             })
-    }, [])
+    }, [currentPage])
+
+    const skeletons = [... new Array(6).map((_, index) => <Skeleton key={index} />)]
 
     return (
         <>
@@ -28,12 +32,9 @@ const Home = () => {
             </div>
             <h2 className="content__title">Все пиццы</h2>
             <div className="content__items">
-                {
-                    isLoading
-                        ? [...new Array(6)].map((_, index) => <Skeleton key={index} />)
-                        : items.map((obj) => <PizzaBlock key={obj.id} {...obj} />)
-                }
+                {isLoading ? skeletons : items.map((obj) => <PizzaBlock key={obj.id} {...obj} />)}
             </div>
+            <Pagination onChangePage={(number) => setCurrentPage(number)} />
         </>
     )
 }
