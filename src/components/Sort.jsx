@@ -1,19 +1,23 @@
 import React, { useState } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { setSort } from '../redux/slices/filterSlice'
 
 const Sort = () => {
+    const dispatch = useDispatch()
+    const sort = useSelector(state => state.filter.sort)
+
     const [open, setOpen] = useState(false)
     const list = [
-        'популярности',
-        'цене',
-        'алфавиту'
+        { name: 'популярности (DESC)', sortProperty: 'rating' },
+        { name: 'популярности (ASC)', sortProperty: '-rating' },
+        { name: 'цене (DESC)', sortProperty: 'price' },
+        { name: 'цене (ASC)', sortProperty: '-price' },
+        { name: 'алфавиту (DESC)', sortProperty: 'title' },
+        { name: 'алфавиту (ASC)', sortProperty: '-title' },
     ]
 
-    const [activeMenuItem, setActiveMenuItem] = useState(0)
-    const sortName = list[activeMenuItem];
-
-
-    const onClickItem = (i) => {
-        setActiveMenuItem(i)
+    const onClickItem = (obj) => {
+        dispatch(setSort(obj))
         setOpen(false)
     }
 
@@ -33,19 +37,19 @@ const Sort = () => {
                     />
                 </svg>
                 <b>Сортировка по:</b>
-                <span onClick={() => setOpen(!open)}>{sortName}</span>
+                <span onClick={() => setOpen(!open)}>{sort.name}</span>
             </div>
             {open && (
                 <div className="sort__popup">
                     <ul>
                         {
-                            list.map((menuItem, i) => (
+                            list.map((obj, i) => (
                                 <li
-                                    onClick={() => onClickItem(i)}
-                                    className={activeMenuItem === i ? 'active' : ''}
+                                    onClick={() => onClickItem(obj)}
+                                    className={sort.sortProperty === obj.sortProperty ? 'active' : ''}
                                     key={i}
                                 >
-                                    {menuItem}
+                                    {obj.name}
                                 </li>
                             ))
                         }
