@@ -1,13 +1,13 @@
 import React from 'react'
+import axios from 'axios';
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { setCategoryId, setCurrentPage } from '../redux/slices/filterSlice';
 import PizzaBlock from '../components/PizzaBlock';
 import Sort from '../components/Sort';
 import { Skeleton } from '../components/Skeleton';
 import Categories from '../components/Categories';
 import { Pagination } from '../components/Pagination';
-import { useDispatch, useSelector } from 'react-redux';
-import { setCategoryId, setCurrentPage } from '../redux/slices/filterSlice';
-import axios from 'axios';
 
 const Home = () => {
     const dispatch = useDispatch()
@@ -24,20 +24,30 @@ const Home = () => {
         dispatch(setCurrentPage(number))
     }
 
-    useEffect(() => {
+    const fetchPizzas = () => {
+        setIsLoading(true);
+
         const sortBy = sort.sortProperty.replace('-', '');
         const order = sort.sortProperty.includes('-') ? 'asc' : 'desc';
-        const category = categoryId > 0 ? String(categoryId) : '';
-        // const search = searchValue;
+        const category = categoryId > 0 ? `category=${categoryId}` : '';
 
-        axios.get(`https://6440e954792fe886a898ea59.mockapi.io/items?page=${currentPage}&limit=4&category=${category}&sortBy=${sortBy}&order=${order}`)
+        axios
+            .get(
+                `https://6440e954792fe886a898ea59.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}`,
+            )
             .then((res) => {
-                setItems(res.data)
-                setIsLoading(false)
-            })
+                setItems(res.data);
+                setIsLoading(false);
+            });
+    };
 
-    }, [currentPage, categoryId, sort.sortProperty])
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        fetchPizzas();
 
+    }, [categoryId, sort.sortProperty, currentPage]);
+
+    const pizzas = items.map((obj) => <PizzaBlock key={obj.id} {...obj} />);
 
     const skeletons = [... new Array(6).map((_, index) => <Skeleton key={index} />)]
 
@@ -49,7 +59,7 @@ const Home = () => {
             </div>
             <h2 className="content__title">Все пиццы</h2>
             <div className="content__items">
-                {isLoading ? skeletons : items.map((obj) => <PizzaBlock key={obj.id} {...obj} />)}
+                {isLoading ? skeletons : pizzas}
             </div>
             <Pagination currentPage={currentPage} onChangePage={onChangePage} />
         </>
