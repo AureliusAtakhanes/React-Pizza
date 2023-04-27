@@ -24,21 +24,24 @@ const Home = () => {
         dispatch(setCurrentPage(number))
     }
 
-    const fetchPizzas = () => {
+    const fetchPizzas = async () => {
         setIsLoading(true);
 
         const sortBy = sort.sortProperty.replace('-', '');
         const order = sort.sortProperty.includes('-') ? 'asc' : 'desc';
         const category = categoryId > 0 ? `category=${categoryId}` : '';
 
-        axios
-            .get(
-                `https://6440e954792fe886a898ea59.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}`,
-            )
-            .then((res) => {
-                setItems(res.data);
-                setIsLoading(false);
-            });
+        try {
+            const res = await axios.get(`https://6440e954792fe886a898ea59.mockapi.io/items?page=${currentPage}&limit=4&${category}&sortBy=${sortBy}&order=${order}`)
+            setItems(res.data);
+            setIsLoading(false);
+        } catch (error) {
+            console.log(error)
+        }
+        finally {
+            setIsLoading(false)
+        }
+
     };
 
     useEffect(() => {
